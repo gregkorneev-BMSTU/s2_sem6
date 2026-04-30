@@ -82,6 +82,11 @@ void runTransfer(Bank* bank, Account* from, Account* to, double amount) {
 
 class DemoReporter {
 public:
+    void printDepartmentsAfterAdding(const char* departmentName, const Bank* bank) const {
+        std::cout << "Добавлено новое отделение: " << departmentName << ".\n";
+        printDepartments(*bank);
+    }
+
     void printState(const char* title,
                     const Bank* bank,
                     const Client* client,
@@ -146,14 +151,10 @@ int main() {
                       &bank,
                       std::string("Онлайн-офис"),
                       std::string("Москва, ул. Электрозаводская, 1"));
-        queue.enqueue(&DemoReporter::printState,
+        queue.enqueue(&DemoReporter::printDepartmentsAfterAdding,
                       &reporter,
-                      "Состояние после добавления нового отделения",
-                      &bank,
-                      &client,
-                      &savings,
-                      &credit,
-                      &deposit);
+                      "Онлайн-офис",
+                      &bank);
         queue.enqueue(&Account::deposit,
                       &savings,
                       2500.0,
@@ -181,15 +182,11 @@ int main() {
         std::cout << "После enqueue задачи только поставлены в очередь.\n";
         std::cout << "Количество задач в очереди: " << queue.size() << '\n';
         std::cout << "До запуска очереди состояние банка и счетов не изменилось.\n";
-        reporter.printState("Проверка перед выполнением очереди",
-                            &bank, &client, &savings, &credit, &deposit);
 
         printSection("ВЫЗОВ run_one()");
         queue.run_one();
         std::cout << "Количество задач после run_one(): " << queue.size() << '\n';
         std::cout << "Выполнилась только первая задача, поэтому предметная область еще не изменилась.\n";
-        reporter.printState("Состояние после run_one()",
-                            &bank, &client, &savings, &credit, &deposit);
 
         printSection("ВЫЗОВ run_all()");
         queue.run_all();
@@ -217,8 +214,7 @@ int main() {
         std::cout << "Сейчас мы выйдем из блока без run_one() и run_all().\n";
     }
 
-    reporter.printState("Проверка после уничтожения второй очереди",
-                        &bank, &client, &savings, &credit, &deposit);
+    std::cout << "После уничтожения второй очереди состояние банка не изменилось.\n";
 
     printSection("ДЕМОНСТРАЦИЯ ЗАВЕРШЕНА");
     return 0;
